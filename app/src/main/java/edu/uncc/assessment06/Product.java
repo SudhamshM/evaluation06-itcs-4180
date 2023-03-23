@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import java.io.Serializable;
 
 public class Product implements Serializable {
-    private String pid, name, img_url, price, description, review_count;
+    private String pid, name, img_url, price, description, review_count, docRef, ownerID;
 
 
     public Product(){
@@ -29,6 +29,16 @@ public class Product implements Serializable {
         this.price = json.getString("price");
         this.description = json.getString("description");
         this.review_count = json.getString("review_count");
+    }
+
+    public Product(String name, String img_url, String price, String pid, String docRef, String ownerID)
+    {
+        this.name = name;
+        this.img_url = img_url;
+        this.price = price;
+        this.pid = pid;
+        this.docRef = docRef;
+        this.ownerID = ownerID;
     }
 
     public String getPid() {
@@ -77,5 +87,25 @@ public class Product implements Serializable {
 
     public void setReview_count(String review_count) {
         this.review_count = review_count;
+    }
+
+    public String getDocRef()
+    {
+        return docRef;
+    }
+
+    public void setDocRef(String docRef)
+    {
+        this.docRef = docRef;
+    }
+
+    public String getOwnerID()
+    {
+        return ownerID;
+    }
+
+    public void setOwnerID(String ownerID)
+    {
+        this.ownerID = ownerID;
     }
 }

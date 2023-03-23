@@ -1,9 +1,12 @@
 package edu.uncc.assessment06;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,6 +14,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -19,6 +27,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import edu.uncc.assessment06.databinding.FragmentProductsBinding;
 import edu.uncc.assessment06.databinding.ProductRowItemBinding;
@@ -29,6 +38,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ProductsFragment extends Fragment {
+
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    public static int productCount = 1;
+    public static final String TAG = "evaluation6";
     public ProductsFragment() {
         // Required empty public constructor
     }
@@ -50,6 +64,24 @@ public class ProductsFragment extends Fragment {
         adapter = new ProductsAdapter();
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.recyclerView.setAdapter(adapter);
+        mAuth = FirebaseAuth.getInstance();
+        binding.buttonLogout.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                mAuth.signOut();
+                mListener.logout();
+            }
+        });
+        binding.buttonGoToCart.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                mListener.goToCart();
+            }
+        });
         getProducts();
     }
 
@@ -125,12 +157,64 @@ public class ProductsFragment extends Fragment {
                 mBinding = rowItemBinding;
             }
 
-            void setupUI(Product product){
+            void setupUI(Product product) {
                 this.mProduct = product;
                 mBinding.textViewProductName.setText(product.getName());
                 mBinding.textViewProductPrice.setText("$" + product.getPrice());
                 Picasso.get().load(product.getImg_url()).into(mBinding.imageViewProductIcon);
+
+                mBinding.imageViewAddToCart.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        db = FirebaseFirestore.getInstance();
+                        HashMap<String, Object> data = new HashMap<>();
+                        DocumentReference docRef = db.collection("products").document("product"+productCount);
+                        data.put("name", mProduct.getName());
+                        data.put("img_url", mProduct.getImg_url());
+                        data.put("pid", mProduct.getPid());
+                        data.put("price", mProduct.getPrice());
+                        mProduct.setDocRef("product"+productCount);
+                        data.put("docRef", mProduct.getDocRef());
+                        data.put("ownerID", mAuth.getCurrentUser().getUid());
+
+                        docRef.set(data).addOnCompleteListener(new OnCompleteListener<Void>()
+                        {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task)
+                            {
+                                if (task.isSuccessful())
+                                {
+                                    Toast.makeText(getActivity(), "Added to cart.", Toast.LENGTH_SHORT).show();
+                                    productCount++;
+                                }
+                                else
+                                {
+                                    Toast.makeText(getActivity(), "Failed to add to cart.", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onComplete: fail add cart " + task.getException().getMessage());
+                                }
+                            }
+                        });
+
+                    }
+                });
             }
         }
+    }
+
+    interface ProductsListener
+    {
+        void goToCart();
+        void logout();
+    }
+
+    ProductsListener mListener;
+
+    @Override
+    public void onAttach(@NonNull Context context)
+    {
+        super.onAttach(context);
+        mListener = (ProductsListener) context;
     }
 }

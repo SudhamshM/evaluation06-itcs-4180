@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import edu.uncc.assessment06.databinding.FragmentLoginBinding;
 
 public class LoginFragment extends Fragment {
+    private FirebaseAuth mAuth;
     public LoginFragment() {
         // Required empty public constructor
     }
@@ -41,6 +42,7 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
 
         binding.buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,7 +54,7 @@ public class LoginFragment extends Fragment {
                 } else if (password.isEmpty()){
                     Toast.makeText(getActivity(), "Enter valid password!", Toast.LENGTH_SHORT).show();
                 } else {
-                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){

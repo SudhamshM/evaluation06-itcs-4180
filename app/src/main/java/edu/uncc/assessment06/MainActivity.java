@@ -6,8 +6,11 @@ import android.os.Bundle;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements LoginFragment.LoginListener,
-        SignUpFragment.SignUpListener {
+public class MainActivity extends AppCompatActivity
+        implements LoginFragment.LoginListener,
+        SignUpFragment.SignUpListener,
+        ProductsFragment.ProductsListener
+{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +29,11 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
     }
 
     @Override
-    public void createNewAccount() {
+    public void createNewAccount()
+    {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.rootView, new SignUpFragment())
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -36,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
     public void login() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.rootView, new LoginFragment())
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -43,6 +49,24 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
     public void authSuccessful() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.rootView, new ProductsFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void goToCart()
+    {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, new CartFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void logout()
+    {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, new LoginFragment())
                 .commit();
     }
 }
